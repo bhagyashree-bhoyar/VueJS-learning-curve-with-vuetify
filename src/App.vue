@@ -5,12 +5,12 @@
       app
     >
       <v-list flat>
-        <v-list-item-group v-model="item" color="primary">
+        <v-list-item-group color="primary">
           <v-list-item
             v-for="(item, i) in items"
             :key="i"
           >
-            <router-link :to="item.route" title="List" class="list-item">
+            <router-link :to="item.route" title="List" class="list-items">
               <v-list-item-icon>
                 <v-icon v-text="item.icon"></v-icon>
               </v-list-item-icon>
@@ -65,18 +65,13 @@
       ],
   }),
   };
+   /**
+    * Set the store state into browser local localStorage.
+    * @param{object} mutation is object of action payload and type
+    * @param{state} store state
+    */
 store.subscribe((mutation, state) => {
 	localStorage.setItem('store', JSON.stringify(state));
 });
 
 </script>
-
-<style scoped>
-
-  .list-item {
-    display: flex;
-    text-decoration: none;
-    width: 100%
-  }
-
-</style>

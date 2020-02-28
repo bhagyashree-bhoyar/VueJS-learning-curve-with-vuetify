@@ -21,28 +21,25 @@
         </v-toolbar>
         <v-spacer></v-spacer>
         <v-card-text class="card-text-wrapper">
-          <v-form ref="form"
+          <v-form
+            ref="form"
             @submit.prevent="submit()"
             v-model="valid"
             class="form-style"
           >
             <v-text-field
               v-model="name"
-              :error-messages="nameErrors"
               :counter="20"
+              :rules="nameRules"
               label="Name"
               required
-              @input="$v.name.$touch()"
-              @blur="$v.name.$touch()"
             >
             </v-text-field>
             <v-text-field
               v-model="email"
-              :error-messages="emailErrors"
+              :rules="emailRules"
               label="E-mail"
               required
-              @input="$v.email.$touch()"
-              @blur="$v.email.$touch()"
             >
             </v-text-field>
             <v-btn
@@ -56,6 +53,7 @@
             class="btn-style"
               @click="clear"
               color="warning"
+              type="button"
             >
               clear
             </v-btn>
@@ -80,73 +78,44 @@
 <script>
 
   /* eslint-disable no-useless-escape */
-  import { validationMixin } from 'vuelidate'
-  import { required, maxLength, email } from 'vuelidate/lib/validators'
   
   export default {
-    mixins: [validationMixin],
-    validations: {
-      name: { required, maxLength: maxLength(20) },
-      email: { required, email },
-    },
     data: () => ({
       name: '',
+      nameRules: [
+      value => !!value || 'Name is required',
+      value => (value && value.length <= 20) || 'Name must be less than 20 characters',
+      value => /^[a-zA-Z\s\.]+$/.test(value) || 'Name can have only characters',
+    ],
       email: '',
-      valid: false,
+      emailRules: [
+      value => !!value || 'E-mail is required',
+      value => /.+@.+\..+/.test(value) || 'E-mail must be valid',
+    ],
+      valid: true,
       submitted: false,
     }),
-    computed: {
-      nameErrors () {
-        const errors = [];
-        const nameRegExp = /^[a-zA-Z\s\.]+$/;
 
-        if (!this.$v.name.$dirty) return errors
-        !this.$v.name.maxLength && errors.push('Name must be at most 20 characters long')
-        !this.$v.name.required && errors.push('Name is required.')
-        !nameRegExp.test(this.name) && errors.push('Name can have only characters')
-        return errors
-      },
-      emailErrors () {
-        const errors = [];
-      
-        if (!this.$v.email.$dirty) return errors 
-        this.$store.state.entrys.forEach((entry) => {
-        if (entry.email == this.email) errors.push('This email already exists');
-         });
-        !this.$v.email.email && errors.push('Must be valid e-mail')
-        !this.$v.email.required && errors.push('E-mail is required')
-        return errors
-      },
-    },
     methods: {
+       /**
+         * Submit the form data of add entry.
+         * also reset the form
+         */
       submit () {
-        this.$v.$touch()
         if(this.valid && this.name && this.email) {
           this.$store.dispatch('addEntry',{name: this.name, email: this.email});   
           this.submitted= true;
           this.clear();
         }
       },
+       /**
+         * Reset the form and submitted flag
+         */
       clear () {
-        this.$v.$reset()
-        this.name = ''
-        this.email = ''
+        this.$refs.form.reset()
+        this.submitted= false;
       },
     },
   }
 
 </script>
-<style scoped>
-  .card-text-wrapper {
-    background: #e8e0b4;
-    padding: 15px 25px;
-  }
-  .form-style {
-    background: rgba(255,255,255,0.7);
-    padding: 15px;
-  }
-  .btn-style {
-    margin-top: 25px;
-    margin-right: 25px;
-  }
-</style>
