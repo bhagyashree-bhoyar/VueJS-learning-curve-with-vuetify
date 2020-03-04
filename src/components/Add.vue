@@ -62,7 +62,6 @@
       </v-card>
       <v-alert
         v-model="submitted"
-        dismissible
         dense
         text
         icon="mdi-check"
@@ -70,6 +69,17 @@
         elevation="2"
       >
         Added entry successfully!
+        <v-btn
+          min-width="20px"
+          color="success"
+          width="20px"
+          height="25px"
+          v-on:click="toggleSubmited"
+        >
+          <v-icon >
+            mdi-close-circle
+          </v-icon>
+        </v-btn>
       </v-alert>
     </v-flex>
   </v-layout>
@@ -78,6 +88,7 @@
 <script>
 
   /* eslint-disable no-useless-escape */
+  
   
   export default {
     data: () => ({
@@ -95,7 +106,6 @@
       valid: true,
       submitted: false,
     }),
-
     methods: {
        /**
          * Submit the form data of add entry.
@@ -105,8 +115,14 @@
         if(this.valid && this.name && this.email) {
           this.$store.dispatch('addEntry',{name: this.name, email: this.email});   
           this.submitted= true;
-          this.clear();
+          this.$refs.form.reset();
         }
+      },
+      /**
+         * Reset submitted flag.
+         */
+      toggleSubmited () {
+        this.submitted= false;
       },
        /**
          * Reset the form and submitted flag

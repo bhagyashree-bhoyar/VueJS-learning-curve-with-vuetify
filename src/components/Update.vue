@@ -35,42 +35,21 @@
             </v-list-item-content>
           </div>
           <div v-if="update && (updateIndex == index)">
-            <v-form 
-              :ref="entry.name"
-              v-model="valid"
-              v-if="!submitted"
-              @submit.prevent="updateEnttryValues()"
-            >
-              <v-text-field
-                v-model="name"
-                :rules="nameRules"
-                :counter="20"
-                label="Name"
-                required
-              >
-              </v-text-field>
-              <v-text-field
-                v-model="email"
-                :rules="emailRules"
-                label="E-mail"
-                required
-              >
-              </v-text-field>
-              <v-btn
-                class="mr-4"
-                type="submit"
-                color="success"
-              >
-                submit
-              </v-btn>
-              <v-btn
-                @click="clear(entry.name)"
-                color="warning"
-                type="button"
-              >
-                clear
-              </v-btn>
-            </v-form>
+            <FormDemo
+             :name=name
+             :valid=valid
+             FormRef="forms"
+             :submitted=submitted
+             :submit="updateEnttryValues"
+             :nameRules=nameRules
+             :counter="20"
+             :nameRequired="true"
+             :email=email
+             :emailRequired="true"
+             :emailRules=emailRules
+             :clear="clear"
+            />
+            
             <v-alert
               v-model="submitted"
               dense
@@ -103,6 +82,7 @@
 
   /* eslint-disable no-useless-escape */
   import cloneDeep from 'lodash/cloneDeep';
+  import FormDemo from './FormDemo.vue';
     
   export default {
     name: 'List',
@@ -124,11 +104,14 @@
       updateIndex: null,
       preveousEntrys: [],
     }),
+    components: {
+      FormDemo,
+    },
     computed: {
       /**
-         * Computed the entrys for store 
-         * @return{array} entrys
-         */
+        * Computed the entrys for store 
+        * @return{array} entrys
+        */
       entrys(){
         return this.$store.state.entrys
       },
@@ -136,18 +119,28 @@
     methods: {
        /**
          * Set the entry field value, index of update entry and update flag in data when click on update button
+         * @param{name} form selected entry name value
+         * @param{email} form selected entry email value
+         * @param{index} form selected entry index value
          */
-      updateEntry: function(name, email, index) {
+      updateEntry (name, email, index) {
         this.name= name;
         this.email= email;
         this.updateIndex= index;
         this.update= true;
+        this.submitted= false;
       },
          /**
          * Set the updated entry value into store,
          * set the submitted flag and reset the form when form is validate.
+         * @param{name} form name input field value
+         * @param{email} form email input field value
+         * @param{valid} form data validation flag
          */
-      updateEnttryValues () {
+      updateEnttryValues (name, email, valid) {
+        this.name= name;
+        this.email= email;
+        this.valid= valid;
         if(this.valid && this.name && this.email) {
           this.preveousEntrys = cloneDeep(this.$store.state.entrys);
           this.preveousEntrys[this.updateIndex].name= this.name;
@@ -159,7 +152,7 @@
        /**
          * Reset submitted flag, update flag, updateIndex, and preveousEntrys.
          */
-      toggleSubmited: function () {
+      toggleSubmited () {
         this.submitted= false;
         this.update= false;
         this.updateIndex= null;
@@ -167,11 +160,15 @@
       },
       /**
         * Reset form
+        * @param{fromRefs} form refs
         */
-      clear (name) {
-        this.$refs[name][0].reset();
+      clear (fromRefs) {
+        fromRefs.forms.reset();
+        this.name= '';
+        this.email= '';
       },
     },
   }
 
 </script>
+
